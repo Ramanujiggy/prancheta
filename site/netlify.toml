@@ -1,0 +1,4 @@
+# Sales page on Netlify: Base directory = site. Plain files, no build.
+[build]
+command = ""
+publish = "."

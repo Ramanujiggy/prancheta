@@ -1,0 +1,3431 @@
+/* Prancheta: the Clipboard look. White paper, navy ink, one red marker.
+   Red means "act now" and nothing else: the main button and the last ten
+   seconds of a round. Lines separate things, not shadows. Everything that
+   moves takes 120ms or less, and pressed states show on touch-down. */
+
+:root,
+[data-theme='light'] {
+  --paper: #f8f9fb;
+  /* The surface the sheets lie on. Every look uses the paper for now. */
+  --desk: var(--paper);
+  --sheet: #eef1f5;
+  --sheet-2: #e6eaf0;
+  --ink: #13233b;
+  --ink-2: #3d4c63;
+  --muted: #5d6b80;
+  --hint: #8592a5;
+  --rule: #d9dee6;
+  --rule-strong: #b7c1ce;
+  --marker: #d42a20;
+  --belt: #0d1117;
+  --marker-press: #b3221a;
+  --on-marker: #ffffff;
+  --rest: #13233b;
+  --on-rest: #ffffff;
+  --focus: #2f6fd6;
+
+  /* The class builds from solo movement to live rolling, so its five blocks
+     walk from light ink to full ink. */
+  --sec-1: #c9d3e0;
+  --sec-2: #9fb0c6;
+  --sec-3: #6c7f99;
+  --sec-4: #3d4c63;
+  --sec-5: #13233b;
+
+  --font-head: 'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-ui: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-num: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+
+  --fast: 120ms linear;
+
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+
+/* The look is set on <html> as data-theme (see lib/theme.ts). Light is the
+   default above; Auto picks light or navy from the phone. Every look keeps
+   red for "act now" only. The selectors work on any element, so the theme
+   picker's swatches show each look in its own colors. */
+
+/* Navy: the same sheet in ink, for planning in the dark. Rest stays a
+   brighter navy instead of flashing white. */
+[data-theme='navy'] {
+  --paper: #0f1a2b;
+  --sheet: #16233a;
+  --sheet-2: #1c2b45;
+  --ink: #eef2f7;
+  --ink-2: #c9d3e0;
+  --muted: #9fb0c6;
+  --hint: #6e809a;
+  --rule: #2a3a54;
+  --rule-strong: #3e5272;
+  --marker: #ff6a5c;
+  --belt: var(--ink);
+  --marker-press: #ff8578;
+  --on-marker: #0f1a2b;
+  --rest: #24467a;
+  --on-rest: #ffffff;
+  --focus: #8fb6ff;
+  --sec-1: #34465f;
+  --sec-2: #4f6585;
+  --sec-3: #7489a8;
+  --sec-4: #a7b6ca;
+  --sec-5: #eef2f7;
+  color-scheme: dark;
+}
+
+/* Slate: cool charcoal with white type and grey chips, like a video
+   library at night. Coral marker as in Navy. */
+[data-theme='slate'] {
+  --paper: #181b22;
+  --sheet: #22262e;
+  --sheet-2: #2b3038;
+  --ink: #eceef1;
+  --ink-2: #d2d6dc;
+  --muted: #9ca3ad;
+  --hint: #6f7681;
+  --rule: #2a2f37;
+  --rule-strong: #3b424a;
+  --marker: #ff6a5c;
+  --belt: var(--ink);
+  --marker-press: #ff8578;
+  --on-marker: #181b22;
+  --rest: #3b424a;
+  --on-rest: #ffffff;
+  --focus: #8fb6ff;
+  --sec-1: #3b424a;
+  --sec-2: #59616c;
+  --sec-3: #7d8591;
+  --sec-4: #b3b9c2;
+  --sec-5: #eceef1;
+  color-scheme: dark;
+}
+
+/* Tan: an old brown leather folder at night. Manila-cream ink on dark
+   brown, as calm as Navy. Rest lifts to a warm saddle brown. */
+[data-theme='tan'] {
+  --paper: #1d1610;
+  --sheet: #271e16;
+  --sheet-2: #30251b;
+  --ink: #efe3c9;
+  --ink-2: #d6c4a2;
+  --muted: #b39e7d;
+  --hint: #82705a;
+  --rule: #3b2e22;
+  --rule-strong: #55432f;
+  --marker: #ff6a5c;
+  --belt: var(--ink);
+  --marker-press: #ff8578;
+  --on-marker: #1d1610;
+  --rest: #6a4426;
+  --on-rest: #ffffff;
+  --focus: #8fb6ff;
+  --sec-1: #55432f;
+  --sec-2: #7a6247;
+  --sec-3: #a08766;
+  --sec-4: #cbb592;
+  --sec-5: #efe3c9;
+  color-scheme: dark;
+}
+
+/* Dark: belt black, no blue. Rest lifts to charcoal. */
+[data-theme='dark'] {
+  --paper: #161616;
+  --sheet: #1f1f1f;
+  --sheet-2: #282828;
+  --ink: #e6e3dc;
+  --ink-2: #c7c4bd;
+  --muted: #a3a19b;
+  --hint: #77756f;
+  --rule: #2e2e2e;
+  --rule-strong: #444444;
+  --marker: #ff5b4f;
+  --belt: var(--ink);
+  --marker-press: #ff7a70;
+  --on-marker: #161616;
+  --rest: #3a3a3a;
+  --on-rest: #ffffff;
+  --focus: #8fb6ff;
+  --sec-1: #3d3d3d;
+  --sec-2: #5c5c5c;
+  --sec-3: #858585;
+  --sec-4: #b5b5b5;
+  --sec-5: #e6e3dc;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--desk);
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  transition: background-color var(--fast);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+a,
+[role='button'] {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+button {
+  cursor: pointer;
+  user-select: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--focus) 28%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ─── Type ───────────────────────────────────────────────────────────────── */
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+/* The logo: belt black by day, light by night, one red bar. */
+.rank-mark {
+  flex: none;
+}
+.rank-mark .belt {
+  fill: var(--belt);
+}
+.rank-mark .bar {
+  fill: var(--marker);
+}
+
+.page-title {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.card-title {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 23px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.narrative {
+  font-size: 17px;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.eyebrow,
+.eyebrow-strong {
+  font-family: var(--font-head);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.eyebrow-strong {
+  color: var(--ink);
+}
+
+.sub-label {
+  font-family: var(--font-head);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.mono {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A heading that runs a rule out to the edge, the way a printed form
+   labels each part. */
+.ruled {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ruled::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule-strong);
+}
+
+/* A number set in a solid ink block, so it reads as part of the form and
+   not as a loose digit in front of the words. */
+.num-tag {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* ─── Tally marks ────────────────────────────────────────────────────────── */
+
+.tally {
+  display: block;
+  flex: none;
+  color: var(--ink);
+}
+
+.tally .on {
+  stroke: currentColor;
+}
+
+.tally .off {
+  stroke: var(--rule-strong);
+}
+
+.tally .strike {
+  stroke: currentColor;
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: calc(20px + var(--sat)) 20px calc(96px + var(--sab));
+}
+
+@media (min-width: 900px) {
+  .shell {
+    padding: 36px 36px 80px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.desk {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.desk-main {
+  flex: 1 1 640px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.desk-margin {
+  flex: 0 0 300px;
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 960px) {
+  .desk {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .desk-margin {
+    position: static;
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 22px;
+}
+
+@media (max-width: 520px) {
+  .card {
+    padding: 18px;
+  }
+}
+
+.hero-card {
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding: 26px 0 28px;
+}
+
+.subpanel {
+  background: var(--sheet);
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+/* The blocks are lines on one sheet: an ink rule on top, a rule between
+   blocks, and a margin rule after the number. Each line folds to box,
+   number, name, what's in it, time. The box is a clipboard checkbox, inked
+   in once the block has something in it. The open block gets an ink bar in
+   the margin; red stays for "act now". */
+.block-sheet {
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-top: 2px solid var(--ink);
+  border-radius: 4px 4px 10px 10px;
+}
+
+.section {
+  position: relative;
+  padding: 0;
+  scroll-margin-top: 12px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  bottom: -1px;
+  width: 3px;
+  background: transparent;
+  transition: background-color var(--fast);
+}
+
+.section.open::before {
+  background: var(--ink);
+}
+
+/* A block's header: drag handle, the fold toggle, and the block's menu. */
+.section-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.section-head .section-toggle {
+  padding-left: 4px;
+  padding-right: 6px;
+}
+
+.drag-handle {
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 2px 0 8px;
+  border: none;
+  background: transparent;
+  color: var(--hint);
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:focus-visible {
+  color: var(--ink);
+}
+
+@media (hover: hover) {
+  .drag-handle:hover {
+    color: var(--ink);
+  }
+}
+
+.section.dragging {
+  background: var(--paper);
+  outline: 1px solid var(--ink);
+  box-shadow: 0 8px 24px rgb(19 35 59 / 0.18);
+  z-index: 5;
+}
+
+.section.dragging .drag-handle {
+  cursor: grabbing;
+  color: var(--ink);
+}
+
+.block-menu {
+  position: relative;
+  padding-right: 8px;
+}
+
+.menu-pop {
+  position: absolute;
+  right: 8px;
+  top: calc(100% + 4px);
+  z-index: 20;
+  min-width: 190px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgb(19 35 59 / 0.18);
+}
+
+.menu-pop button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14.5px;
+  text-align: left;
+}
+
+@media (hover: hover) {
+  .menu-pop button:hover:not(:disabled) {
+    background: var(--sheet);
+  }
+}
+
+.menu-pop button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.menu-pop button.danger {
+  color: var(--marker);
+}
+
+/* The sheet's last line: an empty ruled line waiting for the next block. */
+.add-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 0 0 10px 10px;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+@media (hover: hover) {
+  .add-block:hover {
+    color: var(--ink);
+    background: var(--sheet);
+  }
+}
+
+.add-block:active {
+  background: var(--sheet-2);
+}
+
+.kind-list,
+.format-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.format-list .template.blank {
+  margin-top: 0;
+  align-items: flex-start;
+}
+
+/* A layout's blocks as a row of ruled cells, in teaching order. */
+.format-blocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.format-blocks span {
+  padding: 2px 7px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+/* The class strip: the five kinds, tallied. Unused kinds stay faint. */
+.class-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+}
+
+.strip-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .strip-kind:hover {
+    border-color: var(--ink);
+  }
+}
+
+.strip-kind.unused {
+  border-style: dashed;
+  color: var(--hint);
+  font-weight: 500;
+}
+
+@media (hover: hover) {
+  .strip-kind.unused:hover {
+    color: var(--ink);
+  }
+}
+
+.strip-tally {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.strip-tally i {
+  display: block;
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--ink);
+}
+
+.strip-kind.live .strip-tally i {
+  background: var(--marker);
+}
+
+.strip-min {
+  font-family: var(--font-num);
+  font-size: 12px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.strip-live {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--marker);
+  white-space: nowrap;
+}
+
+.timeline-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.section-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 68px;
+  padding: 0 18px;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+
+.section-toggle:active {
+  background: var(--sheet);
+}
+
+.section-index {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-num);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--muted);
+  min-width: 26px;
+}
+
+/* In a folded line the box sits over the number, left of the margin rule,
+   which runs the full height of the line. */
+.section-toggle .section-index {
+  align-self: stretch;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
+  padding-right: 12px;
+  border-right: 1px solid var(--rule-strong);
+  color: var(--ink-2);
+}
+
+.section-box {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 2px;
+  flex: none;
+}
+
+.section-box.filled {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.section-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 14px 0;
+}
+
+.section-toggle .card-title {
+  font-size: 21px;
+  overflow-wrap: anywhere;
+}
+
+/* On the narrowest phones the line gives the name every pixel: tighter
+   margins, and no chevron (the ink bar already shows which block is open). */
+@media (max-width: 380px) {
+  .section-toggle {
+    gap: 8px;
+    padding: 0 8px 0 2px;
+  }
+  .section-toggle .section-index {
+    padding-right: 8px;
+  }
+  .section-toggle .card-title {
+    font-size: 18px;
+  }
+  .section-chevron {
+    display: none;
+  }
+  .drag-handle {
+    padding-left: 4px;
+  }
+  .block-menu {
+    padding-right: 2px;
+  }
+}
+
+.section-summary {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.section-summary.is-empty {
+  color: var(--muted);
+}
+
+/* Open, the hint reads under the header at full width, then the fields. */
+.section-hint.section-lead {
+  margin: 0;
+}
+
+.section-time {
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.section-chevron {
+  color: var(--muted);
+  transition: transform var(--fast);
+}
+
+.section.open .section-chevron {
+  transform: rotate(180deg);
+  color: var(--ink);
+}
+
+.section .section-stack {
+  padding: 16px 18px 18px;
+  border-top: 1px solid var(--rule);
+}
+
+@media (min-width: 521px) {
+  .section-toggle {
+    padding: 0 22px;
+  }
+  .section .section-stack {
+    padding: 18px 22px 22px;
+  }
+  .add-block {
+    padding: 0 22px;
+  }
+}
+
+.section-next {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+}
+
+.time-row .field {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Optional parts of a block, offered as "+ Label" chips instead of empty boxes. */
+.extras {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.extras-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* On a phone the warm-up suggestions run in one swipeable line, not five rows. */
+@media (max-width: 620px) {
+  .chips.chips-scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -18px;
+    padding: 0 18px 2px;
+    scrollbar-width: none;
+  }
+  .chips-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .chips-scroll .chip {
+    flex: none;
+  }
+}
+
+.section-hint {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color var(--fast),
+    color var(--fast),
+    border-color var(--fast);
+}
+
+/* Pressed shows the instant a finger lands: solid ink, no animation. */
+.btn:active:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  transition: none;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.btn-primary {
+  background: var(--marker);
+  color: var(--on-marker);
+}
+
+@media (hover: hover) {
+  .btn-primary:hover {
+    background: var(--marker-press);
+  }
+}
+
+.btn-secondary {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+@media (hover: hover) {
+  .btn-secondary:hover {
+    border-color: var(--ink);
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-2);
+  padding: 8px 10px;
+}
+
+@media (hover: hover) {
+  .btn-ghost:hover {
+    color: var(--ink);
+    background: var(--sheet);
+  }
+}
+
+/* Destructive actions stay ink: red is reserved for "act now". */
+.btn-danger {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-lg {
+  min-height: 48px;
+  padding: 10px 22px;
+  font-size: 15px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--rule-strong);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.lang-switch button {
+  font: 600 13px/1 var(--font-num);
+  letter-spacing: 0.06em;
+  min-width: 40px;
+  height: 36px;
+  padding: 0 10px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background-color var(--fast),
+    color var(--fast);
+}
+
+.lang-switch button + button {
+  border-left: 1px solid var(--rule-strong);
+}
+
+.lang-switch button[aria-pressed='true'],
+.lang-switch button:active {
+  background: var(--ink);
+  color: var(--paper);
+  transition: none;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  transition:
+    background-color var(--fast),
+    color var(--fast);
+}
+
+@media (hover: hover) {
+  .icon-btn:hover {
+    background: var(--sheet);
+    color: var(--ink);
+  }
+}
+
+.icon-btn:active:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+  transition: none;
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  background: transparent;
+}
+
+/* ─── Inputs ─────────────────────────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field-label {
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 7px;
+  padding: 10px 13px;
+  font-size: 15px;
+  color: var(--ink);
+  transition: border-color var(--fast);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--hint);
+}
+
+@media (hover: hover) {
+  .input:hover,
+  .textarea:hover {
+    border-color: var(--muted);
+  }
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+/* One-line fields are textareas that grow, so a long line wraps on a phone. */
+.line-input {
+  display: block;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 72px;
+  line-height: 1.5;
+}
+
+.input[type='date'] {
+  font-family: var(--font-num);
+  font-size: 14px;
+  /* iOS gives date inputs a native min-width that pushes them out of the card. */
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  text-align: left;
+}
+
+.input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+.title-input {
+  font-family: var(--font-head);
+  font-size: 24px;
+  font-weight: 600;
+  padding: 10px 14px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 620px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.title-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 14px;
+}
+
+@media (max-width: 620px) {
+  .title-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .list-row-actions .move {
+    display: none;
+  }
+}
+
+/* ─── Stepper ────────────────────────────────────────────────────────────── */
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 7px;
+  height: 42px;
+}
+
+.stepper button {
+  width: 38px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+}
+
+@media (hover: hover) {
+  .stepper button:hover {
+    color: var(--ink);
+    background: var(--sheet);
+  }
+}
+
+.stepper button:active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.stepper-value {
+  min-width: 60px;
+  text-align: center;
+  font-family: var(--font-num);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.stepper-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 22px;
+}
+
+/* ─── Toggle ─────────────────────────────────────────────────────────────── */
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: none;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.toggle-track {
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--rule-strong);
+  position: relative;
+  transition: background-color var(--fast);
+  flex: none;
+}
+
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--paper);
+  transition: transform var(--fast);
+}
+
+.toggle[aria-checked='true'] .toggle-track {
+  background: var(--ink);
+}
+
+.toggle[aria-checked='true'] .toggle-track::after {
+  transform: translateX(16px);
+}
+
+.toggle[aria-checked='true'] {
+  color: var(--ink);
+}
+
+/* ─── Editable list ──────────────────────────────────────────────────────── */
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--rule);
+  padding: 2px 0 2px 2px;
+  transition: border-color var(--fast);
+}
+
+.list-row:first-child {
+  border-top: 1px solid var(--rule);
+}
+
+.list-row:focus-within {
+  border-bottom-color: var(--ink);
+}
+
+.list-bullet {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  flex: none;
+  margin-right: 4px;
+}
+
+.list-row .line-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  padding: 8px 4px;
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+.list-row .line-input:focus {
+  outline: none;
+}
+
+.list-row-actions {
+  display: flex;
+  opacity: 0.6;
+  transition: opacity var(--fast);
+}
+
+.list-row:focus-within .list-row-actions {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .list-row:hover .list-row-actions {
+    opacity: 1;
+  }
+}
+
+.list-row-actions .icon-btn {
+  width: 30px;
+  height: 30px;
+}
+
+.list-add {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.list-add .input {
+  font-size: 14.5px;
+  padding: 9px 12px;
+}
+
+/* On the narrowest phones the Add button keeps just its plus, so the line
+   being typed has room. */
+@media (max-width: 360px) {
+  .list-add-label {
+    display: none;
+  }
+}
+
+.list-empty {
+  font-size: 13.5px;
+  color: var(--hint);
+  padding: 8px 2px;
+}
+
+/* ─── Chips ──────────────────────────────────────────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px dashed var(--rule-strong);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    background-color var(--fast),
+    color var(--fast),
+    border-color var(--fast);
+}
+
+@media (hover: hover) {
+  .chip:hover {
+    border-style: solid;
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+}
+
+.chip:active {
+  background: var(--ink);
+  color: var(--paper);
+  transition: none;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ─── Gems ───────────────────────────────────────────────────────────────── */
+
+.move-card {
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-top: 2px solid var(--ink);
+  border-radius: 4px 4px 8px 8px;
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.move-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.move-head .input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.move-num {
+  white-space: nowrap;
+  font-family: var(--font-num);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 30px;
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  border-right: 1px solid var(--rule-strong);
+}
+
+/* ─── Timeline (margin column) ───────────────────────────────────────────── */
+
+.timeline-total {
+  font-family: var(--font-num);
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.04em;
+}
+
+.timeline-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 2px;
+  overflow: hidden;
+  gap: 2px;
+  margin: 16px 0 14px;
+  background: var(--sheet);
+}
+
+.timeline-bar span {
+  display: block;
+  height: 100%;
+  transition: flex-grow var(--fast);
+}
+
+.timeline-rows {
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid var(--ink);
+}
+
+/* A ledger line: colour, number, a margin rule, the block, its minutes. */
+.timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 4px;
+  font-size: 14px;
+  color: var(--ink);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  width: 100%;
+}
+
+@media (hover: hover) {
+  .timeline-row:hover {
+    background: var(--sheet);
+  }
+}
+
+.timeline-num {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  flex: none;
+  width: 30px;
+  border-right: 1px solid var(--rule-strong);
+  font-family: var(--font-num);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.timeline-row .time {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.save-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.save-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-2);
+}
+
+/* ─── Library ────────────────────────────────────────────────────────────── */
+
+.library-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 36px 0 14px;
+}
+
+.library-head::after {
+  content: '';
+  order: 1;
+  flex: 1;
+  height: 1px;
+  background: var(--rule-strong);
+}
+
+.library-head > :last-child {
+  order: 2;
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  border-color: var(--rule-strong);
+  border-top: 2px solid var(--ink);
+  border-radius: 4px 4px 10px 10px;
+  transition: border-color var(--fast);
+}
+
+@media (hover: hover) {
+  .plan-card:hover {
+    border-color: var(--ink);
+  }
+}
+
+.plan-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.plan-date {
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plan-length {
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.plan-card .card-title {
+  font-size: 23px;
+}
+
+.plan-card-concept {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--rule-strong);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* A long game ("Closed guard, top in posture → …") trims to the card's width
+   instead of running off the edge of a phone. */
+.plan-card-meta .pill {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plan-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid var(--rule-strong);
+  padding-top: 12px;
+  margin-top: auto;
+}
+
+.plan-card-foot .actions {
+  display: flex;
+  gap: 2px;
+}
+
+/* A class that just got filed holds its card for a beat, then folds down
+   and away into its month. Snappy and linear, like a page flipped over. */
+.plan-card.is-folding {
+  overflow: hidden;
+  transform-origin: top center;
+  animation: card-fold 180ms linear 650ms forwards;
+}
+
+@keyframes card-fold {
+  to {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+    opacity: 0;
+    transform: scaleY(0.4);
+  }
+}
+
+/* ─── Library: older classes, filed by month ─────────────────────────────── */
+
+.shelf {
+  margin-top: 28px;
+}
+
+.shelf-head {
+  margin-bottom: 8px;
+}
+
+.shelf-month {
+  border: 1px solid var(--rule-strong);
+  border-top: 2px solid var(--ink);
+  border-radius: 4px 4px 8px 8px;
+  background: var(--paper);
+}
+
+.shelf-month + .shelf-month {
+  margin-top: 8px;
+}
+
+.shelf-month-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+}
+
+.shelf-chev {
+  flex: none;
+  transition: transform 150ms linear;
+}
+
+.shelf-month.is-open .shelf-chev {
+  transform: rotate(90deg);
+}
+
+.shelf-month-name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-head);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.shelf-count {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* The count takes the new class in with one tick of the marker. */
+.shelf-count.is-ticking {
+  animation: count-tick 360ms linear;
+}
+
+@keyframes count-tick {
+  0%,
+  50% {
+    background: var(--marker);
+    color: var(--paper);
+  }
+}
+
+.shelf-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 160ms linear;
+}
+
+.shelf-month.is-open .shelf-body {
+  grid-template-rows: 1fr;
+}
+
+.shelf-rows {
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shelf-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px 0 14px;
+  border-top: 1px solid var(--rule);
+}
+
+.shelf-row-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.shelf-day {
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-right: 10px;
+  border-right: 1px solid var(--rule-strong);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.shelf-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.shelf-length {
+  font-family: var(--font-num);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* On a narrow phone the title gets the room; the length is on the class. */
+@media (max-width: 380px) {
+  .shelf-length {
+    display: none;
+  }
+}
+
+@media (hover: hover) {
+  .shelf-row-main:hover .shelf-title {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* The five blocks as a ruled form: a cell each, the number in a margin
+   column. Five across on a wide screen, five lines on a phone. */
+.structure-strip {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 22px 0 0;
+  padding: 0;
+  border: 1px solid var(--rule-strong);
+  border-top: 2px solid var(--ink);
+  border-radius: 4px 4px 8px 8px;
+}
+
+.structure-strip li {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.structure-strip li + li {
+  border-left: 1px solid var(--rule-strong);
+}
+
+.structure-strip b {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 30px;
+  border-right: 1px solid var(--rule);
+  font-family: var(--font-num);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.structure-strip li > span {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 10px 10px;
+}
+
+@media (max-width: 760px) {
+  .structure-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .structure-strip li {
+    min-height: 38px;
+  }
+  .structure-strip li + li {
+    border-left: none;
+    border-top: 1px solid var(--rule);
+  }
+  .structure-strip li > span {
+    padding: 8px 12px;
+  }
+}
+
+/* ─── Teach mode ─────────────────────────────────────────────────────────── */
+
+.run {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Rest takes over the whole screen, so the coach catches it out of the
+   corner of an eye. A hard cut, never a fade. */
+:root:has(.run-timer:not([hidden]) .timer.rest) {
+  --paper: var(--rest);
+  --ink: var(--on-rest);
+  --ink-2: rgba(255, 255, 255, 0.82);
+  --muted: rgba(255, 255, 255, 0.66);
+  --hint: rgba(255, 255, 255, 0.45);
+  --rule: rgba(255, 255, 255, 0.18);
+  --rule-strong: rgba(255, 255, 255, 0.3);
+  --sheet: rgba(255, 255, 255, 0.1);
+  --marker: #ffffff;
+  --marker-press: #e6ebf2;
+  --on-marker: #13233b;
+}
+
+:root:has(.run-timer:not([hidden]) .timer.rest) body {
+  transition: none;
+}
+
+.run-head-title {
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--ink-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.run-progress {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 26px;
+}
+
+.run-progress button {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  text-align: left;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  min-width: 0;
+}
+
+.run-progress button span.bar {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border-radius: 2px;
+  border: 1.5px solid var(--rule-strong);
+}
+
+.run-progress button.done span.bar {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.run-progress button.active span.bar {
+  border-color: var(--ink);
+  background: linear-gradient(90deg, var(--ink) 50%, transparent 50%);
+}
+
+.run-progress button.active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.run-progress .label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@media (max-width: 620px) {
+  .run-progress .label {
+    display: none;
+  }
+}
+
+.run-stage {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 28px;
+  align-items: start;
+}
+
+.run-stage.solo {
+  grid-template-columns: minmax(0, 760px);
+  justify-content: center;
+}
+
+@media (max-width: 960px) {
+  .run-stage,
+  .run-stage.solo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .run-stage .pill {
+    white-space: normal;
+  }
+  /* On a phone the timer is what the coach reaches for first. */
+  .run-stage > .card {
+    order: -1;
+  }
+}
+
+/* Block number and kind over the title, on an ink rule. */
+.run-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.run-title {
+  font-family: var(--font-head);
+  font-size: clamp(34px, 6vw, 56px);
+  font-weight: 700;
+  line-height: 1.02;
+  color: var(--ink);
+  margin: 14px 0 18px;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.run-big {
+  font-size: clamp(19px, 2.4vw, 24px);
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 0 0 18px;
+}
+
+.run-lead {
+  font-family: var(--font-head);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+/* Lined paper: every item sits on its own rule. */
+.run-list {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--rule-strong);
+}
+
+.run-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--rule-strong);
+  font-size: clamp(17px, 2vw, 21px);
+  color: var(--ink);
+}
+
+.run-list li::before {
+  content: '';
+  width: 11px;
+  height: 11px;
+  border: 1.75px solid var(--ink);
+  border-radius: 2px;
+  transform: translateY(1px);
+  flex: none;
+}
+
+.run-block + .run-block {
+  margin-top: 26px;
+}
+
+.run-reveal {
+  border: 1px solid var(--rule-strong);
+  border-top: 2px solid var(--ink);
+  border-radius: 4px 4px 10px 10px;
+  padding: 18px;
+}
+
+.run-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+/* Block names can be long ("Aquecimento · Movimentação"), so on a phone each
+   button gets half the row and its name trims instead of pushing off screen. */
+.run-nav .btn {
+  min-width: 0;
+  max-width: calc(50% - 6px);
+}
+
+.run-nav .btn svg {
+  flex: none;
+}
+
+.run-nav-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Timer */
+.timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.timer-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0 4px;
+}
+
+.timer-clock {
+  font-family: var(--font-num);
+  font-size: clamp(72px, 22vw, 104px);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.timer.finishing .timer-clock {
+  color: var(--marker);
+}
+
+.timer-cue {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-2);
+  min-height: 22px;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.timer-queue {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
+  overflow: auto;
+  text-align: left;
+  border-top: 1px solid var(--rule);
+}
+
+.timer-queue div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+}
+
+.timer-queue div.current {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.timer-queue div.past {
+  color: var(--hint);
+  text-decoration: line-through;
+}
+
+.timer-queue .t {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/* ─── Modal / toast ──────────────────────────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  /* A fixed dark scrim: tinting with --ink turned it light grey at night. */
+  background: rgba(8, 14, 24, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(20px + var(--sat)) 20px calc(20px + var(--sab));
+  z-index: 50;
+  overscroll-behavior: contain;
+}
+
+/* The page behind a sheet stays put while the sheet scrolls. */
+html:has(.backdrop),
+html:has(.backdrop) body {
+  overflow: hidden;
+}
+
+/* On a phone, sheets rise from the bottom edge and fit the visible screen,
+   so nothing hides behind Safari's toolbars. */
+@media (max-width: 620px) {
+  .backdrop:not(.clip-lightbox) {
+    align-items: flex-end;
+    padding: calc(12px + var(--sat)) 0 0;
+  }
+  .backdrop .sheet {
+    width: 100%;
+    max-height: calc(100vh - 12px - var(--sat));
+    max-height: calc(100dvh - 12px - var(--sat));
+    border-radius: 16px 16px 0 0;
+    border-bottom: 0;
+    padding-bottom: calc(18px + var(--sab));
+  }
+  .backdrop .dialog-actions .btn {
+    flex: 1;
+  }
+  .backdrop .dialog {
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 0;
+    padding-bottom: calc(18px + var(--sab));
+  }
+}
+
+.dialog {
+  width: min(420px, 100%);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + var(--sab));
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 60;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+}
+
+.toast .btn-secondary {
+  background: transparent;
+  color: var(--paper);
+  border-color: color-mix(in srgb, var(--paper) 40%, transparent);
+}
+
+@media (max-width: 620px) {
+  .hide-sm {
+    display: none;
+  }
+}
+
+/* On a phone the footer's "Back up all plans" does this job, which leaves
+   room for the language switch in the top bar. */
+@media (max-width: 420px) {
+  .hide-xs {
+    display: none;
+  }
+}
+
+/* ─── Technique clips ────────────────────────────────────────────────────── */
+
+.clip-add {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  transition: border-color var(--fast);
+}
+
+@media (hover: hover) {
+  .clip-add:hover {
+    border-color: var(--ink);
+  }
+}
+
+.clip-add:active {
+  background: var(--sheet-2);
+  transition: none;
+}
+
+.clip-add > svg {
+  flex: none;
+}
+
+.clip-add > span {
+  display: flex;
+  flex-direction: column;
+  font-size: 13.5px;
+}
+
+.clip-add strong {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.clip-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 12px;
+}
+
+.clip-field img,
+.clip-field video {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, 280px);
+  max-height: 220px;
+  border-radius: 6px;
+  border: 1px solid var(--rule);
+  background: var(--sheet);
+}
+
+.clip-field-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.clip-maker {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.clip-stage {
+  display: flex;
+  justify-content: center;
+  background: #0b1320;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.clip-stage video,
+.clip-stage img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(48vh, 420px);
+}
+
+.clip-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.range {
+  width: 100%;
+  accent-color: var(--ink);
+  height: 28px;
+}
+
+.clip-error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--marker);
+}
+
+.clip-progress {
+  position: relative;
+  height: 40px;
+  border: 1.5px solid var(--ink);
+  border-radius: 7px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clip-progress span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--sheet-2);
+}
+
+.clip-progress em {
+  position: relative;
+  font-style: normal;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.clip-view {
+  position: relative;
+  display: block;
+  padding: 0;
+  margin: 4px 0 16px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0b1320;
+  max-width: 100%;
+  cursor: zoom-in;
+}
+
+.clip-view img,
+.clip-view video {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 62vh;
+  min-width: min(100%, 360px);
+  object-fit: contain;
+}
+
+.clip-view-hint {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  padding: 6px;
+  border-radius: 6px;
+  background: rgba(11, 19, 32, 0.6);
+  color: #fff;
+}
+
+.clip-lightbox {
+  background: rgba(11, 19, 32, 0.94);
+  cursor: zoom-out;
+  padding: calc(12px + var(--sat)) 12px calc(12px + var(--sab));
+}
+
+.clip-lightbox img,
+.clip-lightbox video {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ─── Print sheet ────────────────────────────────────────────────────────── */
+
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #13233b;
+  }
+  .no-print,
+  .toast,
+  .backdrop {
+    display: none !important;
+  }
+  .print-sheet {
+    display: block;
+    font-family: var(--font-ui);
+    color: #13233b;
+    font-size: 10.5pt;
+    line-height: 1.4;
+  }
+  .print-sheet .ps-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+    border-bottom: 2px solid #13233b;
+  }
+  .print-sheet .ps-head .rank-mark .belt {
+    fill: #0d1117;
+  }
+  .print-sheet .ps-head .rank-mark .bar {
+    fill: #d42a20;
+  }
+  .print-sheet h1 {
+    font-family: var(--font-head);
+    font-size: 24pt;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .print-sheet .ps-meta {
+    font-family: var(--font-num);
+    font-size: 9pt;
+    text-align: right;
+    text-transform: uppercase;
+    color: #3d4c63;
+  }
+  .print-sheet section {
+    break-inside: avoid;
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    gap: 0 8px;
+    padding: 8px 0 9px;
+    border-bottom: 1px solid #dfe3ea;
+  }
+  .print-sheet .ps-box {
+    width: 10px;
+    height: 10px;
+    border: 1.2px solid #13233b;
+    border-radius: 2px;
+    margin-top: 4px;
+  }
+  .print-sheet .ps-time {
+    font-family: var(--font-num);
+    font-size: 10pt;
+    text-align: right;
+    white-space: nowrap;
+    color: #3d4c63;
+  }
+  .print-sheet h2 {
+    font-family: var(--font-head);
+    font-size: 12.5pt;
+    font-weight: 600;
+    margin: 0 0 3px;
+  }
+  .print-sheet h3 {
+    font-family: var(--font-head);
+    font-size: 10.5pt;
+    font-weight: 600;
+    margin: 6px 0 2px;
+  }
+  .print-sheet ul {
+    margin: 2px 0 4px;
+    padding-left: 16px;
+  }
+  .print-sheet p {
+    margin: 2px 0;
+  }
+  .print-sheet .ps-k {
+    font-family: var(--font-head);
+    color: #5d6b80;
+    font-size: 8.5pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .print-sheet .ps-clip {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 55mm;
+    max-height: 40mm;
+    margin: 4px 0;
+    border: 1px solid #dfe3ea;
+  }
+  .print-sheet .ps-notes {
+    margin-top: 12px;
+    height: 34mm;
+    border: 1px solid #dfe3ea;
+    background-image:
+      linear-gradient(#eef2f7 1px, transparent 1px),
+      linear-gradient(90deg, #eef2f7 1px, transparent 1px);
+    background-size: 4mm 4mm;
+    padding: 3px 6px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-sheet .ps-foot {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-family: var(--font-num);
+    font-size: 8pt;
+    color: #5d6b80;
+  }
+}
+
+/* ─── Sheets: welcome + new class ────────────────────────────────────────── */
+
+.sheet {
+  width: min(640px, 100%);
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px - var(--sat) - var(--sab));
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Close stays in reach however far the sheet scrolls. */
+.sheet > .sheet-head {
+  position: sticky;
+  top: -22px;
+  z-index: 2;
+  margin: -22px -22px 0;
+  padding: 22px 22px 10px;
+  background: var(--paper);
+}
+
+@media (max-width: 520px) {
+  .sheet > .sheet-head {
+    top: -18px;
+    margin: -18px -18px 0;
+    padding: 18px 18px 10px;
+  }
+}
+
+.template {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  transition: border-color var(--fast);
+}
+
+@media (hover: hover) {
+  .template:hover {
+    border-color: var(--ink);
+  }
+}
+
+.template:active {
+  background: var(--sheet);
+  transition: none;
+}
+
+.template > span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.template.blank {
+  margin-top: 18px;
+  align-items: center;
+  border-color: var(--rule-strong);
+}
+
+.template-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.template-title.serif {
+  font-family: var(--font-head);
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.template-blurb {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+/* What a block holds: small ruled tags, the clip and timer ones in ink. */
+.traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.section-stack > .traits {
+  margin-top: -4px;
+}
+
+.trait {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.trait-strong {
+  border-color: var(--ink);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.welcome-blocks {
+  list-style: none;
+  margin: 22px 0 18px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid var(--ink);
+}
+
+.welcome-blocks li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.welcome-blocks .num-tag {
+  margin-top: 1px;
+}
+
+.welcome-blocks li > span:last-child {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.welcome-blocks strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.welcome-notes p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+.welcome-notes p + p {
+  margin-top: 8px;
+}
+
+.welcome-notes svg {
+  vertical-align: -2px;
+}
+
+/* Install sheet: numbered steps with the browser's own icons inline. */
+.install-steps {
+  list-style: none;
+  margin: 22px 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.install-steps li {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.install-steps .section-index {
+  font-size: 24px;
+  min-width: 30px;
+  color: var(--marker);
+}
+
+.install-steps li > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.install-steps strong {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.install-glyph {
+  display: inline-block;
+  vertical-align: -3px;
+  margin-left: 4px;
+  padding: 3px;
+  box-sizing: content-box;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  color: var(--focus);
+}
+
+.install-step-action {
+  margin-top: 8px;
+}
+
+.install-foot {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.library-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 48px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.library-foot-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+/* On a narrow phone the two facts stack instead of leaving a stray dot. */
+@media (max-width: 420px) {
+  .library-foot-info {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .library-foot-info .sep {
+    display: none;
+  }
+}
+
+.library-foot .sep {
+  color: var(--hint);
+}
+
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--rule-strong);
+}
+
+@media (hover: hover) {
+  .link:hover {
+    text-decoration-color: var(--ink);
+  }
+}
+
+.update-toast {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 8px 8px 18px;
+}
+
+.save-alert {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--marker);
+  color: var(--on-marker);
+  font-size: 14px;
+  font-weight: 500;
+  padding: calc(10px + var(--sat)) 16px 10px;
+  text-align: center;
+}
+
+/* Paste offer on a fresh copy of the app: classes may be waiting elsewhere. */
+.carry-offer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.carry-offer {
+  flex-wrap: wrap;
+}
+
+.carry-offer > div:first-child {
+  display: grid;
+  gap: 4px;
+  flex: 1 1 260px;
+  font-size: 14px;
+}
+
+.carry-box {
+  margin-top: 6px;
+  min-height: 0;
+  font-size: 16px; /* 16px or more, or iOS zooms in on focus */
+}
+
+.carry-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ios-keep {
+  margin-top: 32px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+.ios-keep svg {
+  vertical-align: -2px;
+}
+
+.clip-lightbox-close {
+  position: absolute;
+  top: calc(12px + var(--sat));
+  right: 12px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* iPhone zooms into any field with text under 16px and stays zoomed, so on
+   touch screens every field is at least 16px. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select,
+  .input:not(.title-input),
+  .list-row .line-input,
+  .list-add .input {
+    font-size: 16px;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.template > svg {
+  flex: none;
+}
+
+/* ─── Plan with AI ───────────────────────────────────────────────────────── */
+
+.ai-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ai-steps {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ai-steps > li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.ai-step-n {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.ai-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-actions .btn {
+  white-space: normal;
+}
+
+.ai-reply,
+.ai-prompt {
+  font-family: var(--font-num);
+  font-size: 13px;
+}
+
+.ai-prompt {
+  min-height: 140px;
+}
+
+.ai-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--marker);
+  background: var(--sheet);
+  border-radius: 0 7px 7px 0;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.template.ai-start {
+  margin-top: 16px;
+  align-items: center;
+  border-color: var(--ink);
+}
+
+/* ─── Theme picker ───────────────────────────────────────────────────────── */
+
+.theme-sheet {
+  width: min(460px, 100%);
+}
+
+.theme-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid var(--ink);
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 4px;
+  border: none;
+  border-bottom: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-option:active {
+  background: var(--sheet);
+}
+
+.theme-option[aria-checked='true'] .theme-name strong {
+  text-decoration: underline 2px;
+  text-underline-offset: 4px;
+}
+
+.theme-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.theme-name strong {
+  font: 700 18px/1.1 var(--font-head);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.theme-name .muted {
+  font-size: 14px;
+}
+
+.theme-check {
+  flex: none;
+  color: var(--ink);
+}
+
+.theme-swatch-pair {
+  display: inline-flex;
+  flex: none;
+}
+
+.theme-swatch-pair .theme-swatch {
+  width: 22px;
+}
+
+.theme-swatch-pair .theme-swatch:first-child {
+  border-radius: 6px 0 0 6px;
+  border-right: none;
+}
+
+.theme-swatch-pair .theme-swatch:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+/* A sheet of paper in the look's own colors. Its border is a fixed grey so
+   white paper still shows on a white sheet. */
+.theme-swatch {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 40px;
+  border: 1px solid #9aa3ad;
+  border-radius: 6px;
+  background: var(--desk);
+  overflow: hidden;
+}
+
+.theme-swatch i {
+  position: absolute;
+  left: 7px;
+  height: 3px;
+  background: var(--ink);
+}
+
+.theme-swatch .sw-title {
+  top: 8px;
+  width: 22px;
+  height: 5px;
+}
+
+.theme-swatch .sw-line {
+  top: 19px;
+  right: 7px;
+  height: 1px;
+  background: var(--rule-strong);
+}
+
+.theme-swatch .sw-line.short {
+  top: 26px;
+}
+
+.theme-swatch .sw-marker {
+  left: auto;
+  right: 6px;
+  top: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--marker);
+}
+
+.theme-swatch-pair .theme-swatch .sw-title {
+  width: 10px;
+}
+
+.theme-swatch-pair .theme-swatch .sw-marker {
+  display: none;
+}
+
+/* ─── Phone: the thumb zone ──────────────────────────────────────────────── */
+
+/* What a coach reaches for (New class, Teach, Next) sits in a bar at the
+   bottom of the screen, under the thumb, clear of the home indicator. */
+.thumb-bar,
+.show-sm {
+  display: none;
+}
+
+/* On a phone, the class the bottom Teach button starts: the one tapped, else
+   the one opened last, else the next one. */
+@media (max-width: 620px) {
+  .plan-card.is-picked,
+  .plan-card.is-picked:hover {
+    border-color: var(--marker);
+    box-shadow: 0 0 0 1px var(--marker);
+  }
+}
+
+.next-tag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.more-menu {
+  position: relative;
+}
+
+.more-list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.more-list button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.more-list button:active {
+  background: var(--sheet);
+}
+
+/* A 320px phone is narrower than a 300px card plus its margins. */
+.plan-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+}
+
+.plan-card-head {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 620px) {
+  .show-sm {
+    display: block;
+  }
+
+  /* Once there are classes, they come first; the pitch lives in How it works. */
+  .hero-card.has-plans {
+    display: none;
+  }
+
+  .thumb-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    gap: 10px;
+    padding: 10px 16px calc(10px + var(--sab));
+    background: var(--desk);
+    border-top: 1px solid var(--rule-strong);
+  }
+
+  .thumb-bar .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 52px;
+  }
+
+  .thumb-bar .btn svg {
+    flex: none;
+  }
+
+  .thumb-bar .btn-primary {
+    flex-grow: 1.4;
+  }
+
+  .thumb-bar-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    line-height: 1.15;
+  }
+
+  .thumb-bar-label small {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.85;
+  }
+
+  /* While typing, or with a sheet open, the bar steps aside. */
+  :root:has(input:focus, textarea:focus, select:focus, .backdrop) .thumb-bar {
+    display: none;
+  }
+
+  :root:has(.thumb-bar) .shell {
+    padding-bottom: calc(110px + var(--sab));
+  }
+
+  :root:has(.thumb-bar:not([hidden])) .toast {
+    bottom: calc(86px + var(--sab));
+  }
+
+  /* Teach: Back and Next stay put at the bottom, wherever the page is
+     scrolled, big enough to hit without looking. */
+  .run-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    margin: 0;
+    padding: 10px 16px calc(10px + var(--sab));
+    background: var(--desk);
+    border-top: 1px solid var(--rule-strong);
+  }
+
+  .run-nav .btn {
+    flex: 1 1 0;
+    min-height: 56px;
+    font-size: 15px;
+  }
+
+  .run {
+    padding-bottom: calc(110px + var(--sab));
+  }
+}
+
+/* Techniques a block other than Technique holds, under its own fields. */
+.borrowed-moves {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

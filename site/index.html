@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prancheta · Class prep for Jiu-Jitsu coaches</title>
+    <meta name="description" data-i18n-content="desc" content="The class-prep app for Jiu-Jitsu coaches. Turn your ideas into a clean class in minutes and keep it on your phone. $10 once. Works offline on phone, tablet and laptop." />
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0F1A2B" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-rank.svg" />
+    <link rel="apple-touch-icon" href="/rank-touch-180.png" />
+    <meta property="og:title" content="Prancheta · Plan the class. Teach the game." />
+    <meta property="og:description" content="The class-prep app for Jiu-Jitsu coaches. Five blocks, five minutes, $10 once." />
+    <meta property="og:image" content="/img/game.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      /* Same Clipboard look as the app: white paper, navy ink, one red marker.
+         Red is only for the buy button and the logo's rank bar. Lines separate things, not shadows. */
+      :root {
+        --paper: #ffffff;
+        --sheet: #f5f7fa;
+        --ink: #13233b;
+        --ink-2: #3d4c63;
+        --muted: #5d6b80;
+        --rule: #dfe3ea;
+        --marker: #d42a20;
+        --belt: #0d1117;
+        --marker-press: #b3221a;
+        --on-marker: #ffffff;
+        --head: 'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+        --ui: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+        --num: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #0f1a2b;
+          --sheet: #16233a;
+          --ink: #eef2f7;
+          --ink-2: #c9d3e0;
+          --muted: #9fb0c6;
+          --rule: #26354d;
+          --marker: #ff6a5c;
+          --belt: #eef2f7;
+          --marker-press: #ff8578;
+          --on-marker: #0f1a2b;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: var(--paper); color: var(--ink); }
+      body { font: 400 17px/1.55 var(--ui); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+      a { color: inherit; }
+      .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+      header.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 18px; border-bottom: 2px solid var(--ink); }
+      .logo { display: flex; align-items: center; gap: 12px; font: 700 24px/1 var(--head); text-decoration: none; }
+      .logo svg { width: 36px; height: 24px; }
+      .eyebrow { font: 600 13px/1 var(--ui); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+      h1, h2, h3 { font-family: var(--head); font-weight: 700; line-height: 1.05; margin: 0; }
+      h1 { font-size: clamp(42px, 7vw, 68px); letter-spacing: -0.01em; }
+      h2 { font-size: clamp(30px, 4.5vw, 42px); margin-bottom: 14px; }
+      h3 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+      p { margin: 0 0 12px; }
+      .lead { font-size: 20px; color: var(--ink-2); max-width: 34em; margin: 18px 0 26px; }
+      .muted { color: var(--muted); }
+      .btn { display: inline-flex; align-items: center; gap: 10px; background: var(--marker); color: var(--on-marker); font: 600 19px/1 var(--ui); text-decoration: none; padding: 18px 26px; border-radius: 8px; }
+      .btn:active { background: var(--marker-press); }
+      .btn:focus-visible { outline: 3px solid #2f6fd6; outline-offset: 3px; }
+      .fine { font-size: 14px; color: var(--muted); margin-top: 12px; }
+      .link-quiet { font-size: 15px; color: var(--muted); }
+
+      .top-right { display: flex; align-items: center; gap: 18px; }
+      .lang { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+      .lang button { font: 600 13px/1 var(--num); letter-spacing: 0.06em; color: var(--muted); background: transparent; border: 0; padding: 8px 10px; min-width: 40px; min-height: 32px; cursor: pointer; transition: background-color 120ms linear, color 120ms linear; }
+      .lang button + button { border-left: 1px solid var(--rule); }
+      .lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+      .lang button:active { background: var(--ink); color: var(--paper); transition: none; }
+      .lang button:focus-visible { outline: 3px solid #2f6fd6; outline-offset: -3px; }
+      .name-note { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 16px; color: var(--ink-2); }
+      .name-note b { font-family: var(--head); font-size: 18px; color: var(--ink); }
+      .say { font: 500 14px/1 var(--num); color: var(--muted); margin: 0 4px; }
+
+      .hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: center; padding: 56px 0 64px; }
+      .phone { width: 100%; max-width: 330px; justify-self: center; border: 1px solid var(--rule); border-radius: 28px; overflow: hidden; background: var(--paper); }
+      .phone img { display: block; width: 100%; height: auto; }
+
+      section { padding: 64px 0; border-top: 1px solid var(--rule); }
+      .narrow > * { max-width: 40em; }
+      .narrow > .faq { max-width: 44em; }
+
+      .blocks { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+      .blocks li { border-top: 6px solid var(--b); padding-top: 14px; }
+      .blocks .n { font: 500 15px/1 var(--num); color: var(--muted); }
+      .blocks strong { display: block; font: 600 21px/1.15 var(--head); margin: 8px 0 6px; }
+      .blocks span.d { font-size: 15px; color: var(--ink-2); }
+      .blocks-note { margin: 22px 0 0; color: var(--muted); font-size: 16px; }
+
+      .steps { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+      .steps li { border-top: 2px solid var(--ink); padding-top: 14px; font-size: 17px; color: var(--ink-2); }
+      .steps .n { display: block; font: 500 15px/1 var(--num); color: var(--muted); margin-bottom: 8px; }
+      .steps-note { margin: 22px 0 0; color: var(--muted); font-size: 16px; }
+
+      .before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; margin-top: 30px; }
+      .before-after figure { margin: 0; display: grid; gap: 10px; }
+      .before-after figcaption { font-size: 14px; color: var(--muted); }
+      .before-after .phone { max-width: 330px; justify-self: start; }
+      .note-card { background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 20px 22px; font: 400 15px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+      .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px 28px; margin-top: 30px; }
+      .features p { color: var(--ink-2); font-size: 16px; }
+
+      .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 34px; }
+      .shots figure { margin: 0; }
+      .shots .phone { max-width: none; border-radius: 20px; }
+      .shots figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; }
+
+      .price { display: flex; flex-wrap: wrap; align-items: center; gap: 32px; justify-content: space-between; }
+      .price .amount { font: 700 clamp(64px, 10vw, 96px)/1 var(--head); }
+      .price .amount small { font-size: 0.35em; color: var(--muted); font-weight: 600; margin-left: 6px; }
+
+      .faq { margin-top: 26px; border-top: 1px solid var(--rule); }
+      .faq details { border-bottom: 1px solid var(--rule); padding: 18px 0; }
+      .faq summary { cursor: pointer; font: 600 19px/1.3 var(--head); list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+      .faq summary::-webkit-details-marker { display: none; }
+      .faq summary::after { content: '+'; font-family: var(--num); color: var(--muted); }
+      .faq details[open] summary::after { content: '\2212'; }
+      .faq details p { margin: 10px 0 0; color: var(--ink-2); }
+
+      footer { border-top: 2px solid var(--ink); padding: 28px 0 48px; font-size: 15px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; }
+
+      @media (max-width: 860px) {
+        .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 40px; }
+        .blocks { grid-template-columns: 1fr; gap: 18px; }
+        .steps { grid-template-columns: 1fr; gap: 18px; }
+        .features { grid-template-columns: 1fr; gap: 22px; }
+        .before-after { grid-template-columns: 1fr; max-width: 420px; }
+        .before-after .phone { justify-self: center; }
+        .shots { grid-template-columns: 1fr; max-width: 330px; margin-left: auto; margin-right: auto; }
+        section { padding: 48px 0; }
+      }
+      @media (max-width: 420px) {
+        .top-right { gap: 12px; }
+        .link-quiet { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <a class="logo" href="/" aria-label="Prancheta home">
+          <svg viewBox="0 0 60 40" aria-hidden="true"><rect y="4" width="60" height="32" rx="6" fill="var(--belt)" /><rect x="32" y="4" width="15" height="32" fill="var(--marker)" /></svg>
+          Prancheta
+        </a>
+        <div class="top-right">
+          <div class="lang" role="group" aria-label="Language / Idioma">
+            <button type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
+            <button type="button" data-lang="pt" aria-pressed="false" lang="pt-BR">PT</button>
+          </div>
+          <a class="link-quiet" href="#buy" data-i18n="getIt">$10 · Get it</a>
+        </div>
+      </header>
+
+      <div class="hero">
+        <div>
+          <p class="eyebrow" data-i18n="heroEyebrow">Class prep for Jiu-Jitsu coaches</p>
+          <h1 data-i18n="heroTitle">Plan the class.<br />Teach the game.</h1>
+          <p class="lead" data-i18n="heroLead">You already know what you want to teach. Prancheta turns it into a clean class in minutes, with short clips of the moves, and keeps it on your phone, ready to teach. Pay once: $10, yours for good.</p>
+          <a class="btn buy" href="#buy" data-i18n="buy">Get Prancheta · $10</a>
+          <p class="fine" data-i18n="heroFine">One payment. No subscription, no account. Works offline.</p>
+        </div>
+        <div class="phone"><img src="/img/game.png" width="780" height="1688" data-i18n-alt="heroAlt" alt="Prancheta on a phone in Teach mode: positional sparring with a 3:00 round timer and the round list." /></div>
+      </div>
+    </div>
+
+    <section>
+      <div class="wrap narrow">
+        <p class="eyebrow" data-i18n="problemEyebrow">The problem</p>
+        <h2 data-i18n="problemTitle">It's 6:55. Class starts at 7.</h2>
+        <p class="lead" style="margin-bottom:0" data-i18n="problemLead">You know what you want to teach. But the plan turns into pages of typing, GIFs you made yourself and a notes app that keeps getting bigger. Prancheta gives every class a clear shape, so you plan it in minutes and teach it straight from your phone.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="narrow">
+          <p class="eyebrow" data-i18n="notesEyebrow">From your notes app</p>
+          <h2 data-i18n="notesTitle">Same class. Ready to teach.</h2>
+          <p class="lead" data-i18n="notesLead">Already have classes in your notes app? Paste one into your AI chat with the Prancheta class format. Your words come back in blocks, with times and rounds, and you teach it with the timer running.</p>
+        </div>
+        <div class="before-after">
+          <figure>
+            <div class="note-card" data-i18n="notesNote">thurs 7pm - leg drag
+
+warmup 10 - fwd/back rolls, shrimps, fwd shrimps, cartwheels
+
+focus: keep hips pinned -&gt; back opens up
+
+GAME from leg drag. top wants back, bottom squares up / recovers guard / single. reset if closed guard
+chest on FAR hip not near!! control far sleeve first. back knee in when they turn
+4 rounds x 3 min?? switch partners then sides, 30s rest
+finish RNC or bow &amp; arrow
+
+tech 15 - back take when they turn (seatbelt THEN hook, let them give it)
+knee cut far side if they block -&gt; mount
+arm posts = armbar. or switch to other leg drag
+
+roll 5x5</div>
+            <figcaption data-i18n="notesBefore">Before: the note you wrote at 6:55.</figcaption>
+          </figure>
+          <figure>
+            <div class="phone"><img src="/img/teach.png" data-src-pt="/img/teach-pt.png" width="780" height="1688" loading="lazy" data-i18n-alt="notesAfterAlt" alt="The same class in Prancheta's Teach mode: positional sparring from the leg drag, round 1 of 4, a 3:00 timer and the rounds with rest." /></div>
+            <figcaption data-i18n="notesAfter">After: the same class, block by block, rounds timed for you.</figcaption>
+          </figure>
+        </div>
+        <p class="steps-note" data-i18n="notesFine">Your AI is told to keep your words as you wrote them and not add drills of its own. Prefer to type? Build the class yourself in five minutes.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <p class="eyebrow" data-i18n="aiEyebrow">Plan it with AI</p>
+        <h2 data-i18n="aiTitle">Your class is already in your head.</h2>
+        <p class="lead" data-i18n="aiLead">Planning it shouldn't mean pages of typing. Talk it through with the AI you already use, out loud and as rough as it comes. Prancheta gives it the class format, and your thoughts come back in order: warm-up, focus, positional sparring, technique and rolling, with times and rounds.</p>
+        <ol class="steps">
+          <li><span class="n">01</span><span data-i18n="ai1">Copy the class format into your AI chat.</span></li>
+          <li><span class="n">02</span><span data-i18n="ai2">Talk through what you want to teach, in your own words.</span></li>
+          <li><span class="n">03</span><span data-i18n="ai3">Paste the answer into Prancheta, add your clips, and the class is on your phone.</span></li>
+        </ol>
+        <p class="steps-note" data-i18n="aiNote">Works with ChatGPT, Claude, Gemini or any AI chat. Or skip it and build the class yourself in five minutes.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <p class="eyebrow" data-i18n="blocksEyebrow">Five building blocks, any order</p>
+        <h2 data-i18n="blocksTitle">Warm up, set the focus, spar from a position, teach the technique, then roll.</h2>
+        <ol class="blocks">
+          <li style="--b:#c9d3e0"><span class="n">01</span><strong data-i18n="b1">Warm-up</strong><span class="d" data-i18n="b1d">Get the body ready for today's position.</span></li>
+          <li style="--b:#9fb0c6"><span class="n">02</span><strong data-i18n="b2">Concept / Focus</strong><span class="d" data-i18n="b2d">The focus of today's class: the one idea everything comes back to.</span></li>
+          <li style="--b:#6c7f99"><span class="n">03</span><strong data-i18n="b3">Positional sparring</strong><span class="d" data-i18n="b3d">Goals first, then the details, the transition and the finish. Rounds like 2 × 3 min, switch partners, switch positions.</span></li>
+          <li style="--b:#3d4c63"><span class="n">04</span><strong data-i18n="b4">Technique</strong><span class="d" data-i18n="b4d">The moves that solve the position, with the key details and what to do when they're stopped.</span></li>
+          <li style="--b:var(--ink)"><span class="n">05</span><strong data-i18n="b5">Rolling</strong><span class="d" data-i18n="b5d">Live rounds to try everything from today.</span></li>
+        </ol>
+        <p class="blocks-note" data-i18n="blocksNote">Repeat a block, drop one, or close with a wrap-up question.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <p class="eyebrow" data-i18n="featEyebrow">What it does</p>
+        <h2 data-i18n="featTitle">Everything a coach needs on the mat. Nothing else.</h2>
+        <div class="features">
+          <div><h3 data-i18n="f1">Teach mode</h3><p data-i18n="f1d">Run the class from your phone, block by block, with a round timer that calls rest and switches.</p></div>
+          <div><h3 data-i18n="f2">Technique clips</h3><p data-i18n="f2d">Film a move, trim it to a few seconds, and it loops in your plan. Made on your phone, nothing uploaded.</p></div>
+          <div><h3 data-i18n="f3">Print it or send it</h3><p data-i18n="f3d">A one-page sheet for the wall, or one class file with every clip playing that opens in any browser. Send it to your assistant coaches.</p></div>
+          <div><h3 data-i18n="f4">Start from an example</h3><p data-i18n="f4d">Ready-made classes from leg drag to mount escapes, or a layout to fill in: game first, technique first, open mat, drilling day or comp prep.</p></div>
+          <div><h3 data-i18n="f5">Works offline</h3><p data-i18n="f5d">Installs on your phone, tablet or laptop and keeps working in the basement gym with no signal.</p></div>
+          <div><h3 data-i18n="f6">Private by design</h3><p data-i18n="f6d">Your classes stay on your device. No account, and nothing about your classes is collected.</p></div>
+        </div>
+        <div class="shots">
+          <figure><div class="phone"><img src="/img/library.png" width="780" height="1688" loading="lazy" data-i18n-alt="s1Alt" alt="The class list with a saved class, its length and its concept." /></div><figcaption data-i18n="s1">Your classes, with each one's length and concept.</figcaption></figure>
+          <figure><div class="phone"><img src="/img/editor.png" width="780" height="1688" loading="lazy" data-i18n-alt="s2Alt" alt="Editing the warm-up block: time and movement drills." /></div><figcaption data-i18n="s2">Plan each block with suggestions to tap in.</figcaption></figure>
+          <figure><div class="phone"><img src="/img/game.png" width="780" height="1688" loading="lazy" data-i18n-alt="s3Alt" alt="Teach mode with the round timer." /></div><figcaption data-i18n="s3">Teach it with the rounds timed for you.</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap narrow">
+        <p class="eyebrow" data-i18n="coachEyebrow">Built by a coach</p>
+        <h2 data-i18n="coachTitle">Made on the mat, not in an office.</h2>
+        <p class="lead" data-i18n="coachLead">Prancheta is built by a working Jiu-Jitsu coach around the class structure they teach every week. Every feature exists because a real class needed it.</p>
+        <p class="name-note" data-i18n="nameNote"><b>Prancheta</b> <span class="say">pran‑SHET‑uh</span> is Portuguese for clipboard. The professor's clipboard, now in your pocket.</p>
+      </div>
+    </section>
+
+    <section id="buy">
+      <div class="wrap price">
+        <div>
+          <p class="eyebrow" data-i18n="priceEyebrow">Price</p>
+          <div class="amount" data-i18n="amount">$10<small>once</small></div>
+          <p class="lead" style="margin:14px 0 0" data-i18n="priceLead">Every update included. Less than one instructional. Less than a month of gym software.</p>
+        </div>
+        <div>
+          <a class="btn buy" href="#buy" data-i18n="buy">Get Prancheta · $10</a>
+          <p class="fine" data-i18n="priceFine">Secure checkout by Lemon Squeezy. Your app link arrives right away. Full refund within 30 days.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap narrow">
+        <p class="eyebrow" data-i18n="faqEyebrow">Questions</p>
+        <h2 data-i18n="faqTitle">Good to know</h2>
+        <div class="faq">
+          <details><summary data-i18n="q1">Is it a subscription?</summary><p data-i18n="q1a">No. You pay $10 once and keep it, updates included.</p></details>
+          <details><summary data-i18n="q2">Do I need an account?</summary><p data-i18n="q2a">No. You pay, you get the link, it works.</p></details>
+          <details><summary data-i18n="q3">Which devices does it work on?</summary><p data-i18n="q3a">iPhone, iPad, Android, Mac, Windows and Chromebook. One purchase covers all of yours.</p></details>
+          <details><summary data-i18n="q4">How do I install it?</summary><p data-i18n="q4a">Open your link. On iPhone or iPad, tap Share, then Add to Home Screen. On Android, Chrome or Edge, tap Install app. From then on it opens like any other app.</p></details>
+          <details><summary data-i18n="q5">Does it work without signal?</summary><p data-i18n="q5a">Yes, once it's installed.</p></details>
+          <details><summary data-i18n="q6">Where are my classes saved?</summary><p data-i18n="q6a">On your device. Back them up any time, or move them to another device.</p></details>
+          <details><summary data-i18n="q10">What if I lose or change my phone?</summary><p data-i18n="q10a">Your classes live on your device, not on a server. Tap Back up all now and then and keep the file anywhere. On a new phone, open your link and import it.</p></details>
+          <details><summary data-i18n="q11">Does Prancheta send my classes to an AI?</summary><p data-i18n="q11a">No. You copy the class format into your own AI chat and paste the answer back. Prancheta itself never sends your classes anywhere.</p></details>
+          <details><summary data-i18n="q7">Is it on the App Store?</summary><p data-i18n="q7a">Not yet. It installs straight from your link, which is how it stays $10.</p></details>
+          <details data-only="pt" hidden><summary data-i18n="q9">Is the app in Portuguese?</summary><p data-i18n="q9a">Yes.</p></details>
+          <details><summary data-i18n="q8">What if it isn't for me?</summary><p data-i18n="q8a">Email us within 30 days for a full refund.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <footer>
+        <span>© <span id="year">2026</span> Prancheta</span>
+        <span><a class="support" href="mailto:help@prancheta.app">help@prancheta.app</a></span>
+      </footer>
+    </div>
+
+    <script>
+      // The only two things to change before launch.
+      const CHECKOUT_URL = ''; // Lemon Squeezy checkout link, e.g. https://prancheta.lemonsqueezy.com/buy/...
+      const SUPPORT_EMAIL = 'help@prancheta.app';
+
+      if (CHECKOUT_URL) document.querySelectorAll('a.buy').forEach((a) => (a.href = CHECKOUT_URL));
+      document.querySelectorAll('a.support').forEach((a) => {
+        a.href = 'mailto:' + SUPPORT_EMAIL;
+        a.textContent = SUPPORT_EMAIL;
+      });
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // English is the page as written; Portuguese swaps the same elements in place.
+      // ?lang=pt (or en) picks a language for a shared link; otherwise the visitor's
+      // last choice, then the browser language.
+      const PT = {
+        title: 'Prancheta · Planejamento de aula para professores de Jiu-Jitsu',
+        desc: 'O app de planejamento de aula para professores de Jiu-Jitsu. Transforme as suas ideias numa aula organizada em minutos e leve no celular. US$10 uma vez. Funciona offline no celular, tablet e notebook.',
+        getIt: 'US$10 · Comprar',
+        heroEyebrow: 'Planejamento de aula para professores de Jiu-Jitsu',
+        heroTitle: 'Planeje a aula.<br />Ensine o jogo.',
+        heroLead: 'Você já sabe o que quer ensinar. A Prancheta transforma isso numa aula organizada em minutos, com clipes curtos das técnicas, e guarda no seu celular, pronta para dar. Pague uma vez só: US$10, e ela é sua para sempre.',
+        buy: 'Quero a Prancheta · US$10',
+        heroFine: 'Um pagamento. Sem assinatura, sem cadastro. Funciona offline.',
+        heroAlt: 'A Prancheta no celular, no modo aula: o específico com um cronômetro de 3:00 e a lista de rounds.',
+        problemEyebrow: 'O problema',
+        problemTitle: 'São 18h55. A aula começa às 19h.',
+        problemLead: 'Você sabe o que quer ensinar. Mas o plano vira páginas de texto, GIFs que você mesmo fez e um app de notas que só cresce. A Prancheta dá um formato claro para cada aula, então você planeja em minutos e dá a aula direto do celular.',
+        notesEyebrow: 'Do seu app de notas',
+        notesTitle: 'A mesma aula. Pronta para dar.',
+        notesLead: 'Já tem aulas no app de notas? Cole uma no chat da sua IA junto com o formato de aula da Prancheta. As suas palavras voltam em blocos, com tempos e rounds, e você dá a aula com o cronômetro rodando.',
+        notesNote: `qui 19h - leg drag
+
+aquecimento 10 - rolamento frente/trás, fuga de quadril, fuga pra frente, estrelinha
+
+foco: prender o quadril -&gt; as costas aparecem
+
+ESPECÍFICO do leg drag. cima quer as costas, baixo fica de frente / recupera guarda / single. recomeça se fechar a guarda
+peito no quadril de LONGE não no de perto!! controla a manga de longe antes. joelho de trás entra quando ele vira
+4 rounds de 3 min?? troca parceiro depois lado, 30s descanso
+finaliza mata-leão ou arco e flecha
+
+técnica 15 - pegada de costas quando ele vira (cinto PRIMEIRO depois gancho, deixa ele te dar)
+passagem de joelho do outro lado se bloquear -&gt; montada
+apoiou o braço = chave de braço. ou troca pro leg drag do outro lado
+
+luta 5x5`,
+        notesBefore: 'Antes: a anotação que você fez às 18h55.',
+        notesAfter: 'Depois: a mesma aula, bloco a bloco, com os rounds cronometrados para você.',
+        notesAfterAlt: 'A mesma aula no modo aula da Prancheta: específico do leg drag, round 1 de 4, cronômetro de 3:00 e os rounds com descanso.',
+        notesFine: 'A sua IA recebe a instrução de manter as suas palavras como você escreveu e não acrescentar exercícios por conta própria. Prefere digitar? Monte a aula você mesmo em cinco minutos.',
+        aiEyebrow: 'Planejar com IA',
+        aiTitle: 'A sua aula já está na sua cabeça.',
+        aiLead: 'Planejar não devia ser escrever páginas. Converse com a IA que você já usa, falando, do jeito que a ideia vier. A Prancheta passa o formato da aula, e os seus pensamentos voltam em ordem: aquecimento, foco, específico, técnica e luta, com tempos e rounds.',
+        ai1: 'Copie o formato da aula para o chat da sua IA.',
+        ai2: 'Fale o que quer ensinar, com as suas palavras.',
+        ai3: 'Cole a resposta na Prancheta, coloque seus clipes e a aula fica no seu celular.',
+        aiNote: 'Funciona com ChatGPT, Claude, Gemini ou qualquer chat de IA. Ou pule essa parte e monte a aula você mesmo em cinco minutos.',
+        blocksEyebrow: 'Cinco blocos, na ordem que quiser',
+        blocksTitle: 'Aqueça, defina o foco, faça o específico, ensine a técnica e termine com a luta.',
+        b1: 'Aquecimento',
+        b1d: 'Prepare o corpo para a posição do dia.',
+        b2: 'Conceito / Foco',
+        b2d: 'O foco da aula de hoje: a ideia que guia todo o resto.',
+        b3: 'Específico',
+        b3d: 'Primeiro os objetivos, depois os detalhes, a transição e a finalização. Rounds como 2 × 3 min, troca de parceiro, troca de posição.',
+        b4: 'Técnica',
+        b4d: 'As técnicas que resolvem a posição, com o pulo do gato e o que fazer quando são bloqueadas.',
+        b5: 'Luta',
+        b5d: 'Rounds valendo para testar tudo o que foi visto hoje.',
+        blocksNote: 'Repita um bloco, tire outro ou feche com uma pergunta para a turma.',
+        featEyebrow: 'O que ela faz',
+        featTitle: 'Tudo o que um professor precisa no tatame. Nada além disso.',
+        f1: 'Modo aula',
+        f1d: 'Conduza a aula pelo celular, bloco a bloco, com um cronômetro de rounds que avisa o descanso e as trocas.',
+        f2: 'Clipes de técnica',
+        f2d: 'Filme uma técnica, corte para poucos segundos e ela roda em loop no seu plano. Tudo feito no seu celular, nada é enviado.',
+        f3: 'Imprima ou envie',
+        f3d: 'Uma folha de uma página para a parede, ou um arquivo da aula com todos os clipes rodando, que abre em qualquer navegador. Mande para os seus professores assistentes.',
+        f4: 'Comece por um exemplo',
+        f4d: 'Aulas prontas, do leg drag às saídas da montada, ou um formato para preencher: jogo primeiro, técnica primeiro, treino livre, dia de drill ou pré-campeonato.',
+        f5: 'Funciona offline',
+        f5d: 'Instala no celular, tablet ou notebook e continua funcionando na academia do subsolo, sem sinal.',
+        f6: 'Suas aulas são só suas',
+        f6d: 'Suas aulas ficam no seu aparelho. Sem cadastro, e nada sobre as suas aulas é coletado.',
+        s1: 'Suas aulas, com a duração e o conceito de cada uma.',
+        s1Alt: 'A lista de aulas com uma aula salva, sua duração e seu conceito.',
+        s2: 'Planeje cada bloco tocando nas sugestões.',
+        s2Alt: 'Editando o bloco de aquecimento: tempo e exercícios de movimentação.',
+        s3: 'Dê a aula com os rounds cronometrados para você.',
+        s3Alt: 'O modo aula com o cronômetro de rounds.',
+        coachEyebrow: 'Feita por um professor',
+        coachTitle: 'Feita no tatame, não num escritório.',
+        coachLead: 'A Prancheta é feita por um professor de Jiu-Jitsu na ativa, em torno da estrutura de aula que ensina toda semana. Cada recurso existe porque uma aula de verdade precisou dele.',
+        nameNote: 'A prancheta do professor, agora no seu bolso.',
+        priceEyebrow: 'Preço',
+        amount: 'US$10<small>uma vez</small>',
+        priceLead: 'Todas as atualizações incluídas. Menos que um instrucional. Menos que um mês de sistema de academia.',
+        priceFine: 'Pagamento seguro pela Lemon Squeezy, cobrado em dólar no cartão. O link do seu app chega na hora. Reembolso integral em até 30 dias.',
+        faqEyebrow: 'Dúvidas',
+        faqTitle: 'Bom saber',
+        q1: 'É assinatura?',
+        q1a: 'Não. Você paga US$10 uma vez e é seu, com as atualizações incluídas.',
+        q2: 'Preciso fazer cadastro?',
+        q2a: 'Não. Você paga, recebe o link e já funciona.',
+        q3: 'Em quais aparelhos funciona?',
+        q3a: 'iPhone, iPad, Android, Mac, Windows e Chromebook. Uma compra vale para todos os seus.',
+        q4: 'Como eu instalo?',
+        q4a: 'Abra o seu link. No iPhone ou iPad, toque em Compartilhar e depois em Adicionar à Tela de Início. No Android, Chrome ou Edge, toque em Instalar app. A partir daí ela abre como qualquer outro app.',
+        q5: 'Funciona sem sinal?',
+        q5a: 'Sim, depois de instalada.',
+        q6: 'Onde minhas aulas ficam salvas?',
+        q6a: 'No seu aparelho. Faça backup quando quiser, ou passe as aulas para outro aparelho.',
+        q10: 'E se eu perder ou trocar de celular?',
+        q10a: 'Suas aulas ficam no seu aparelho, não num servidor. Toque em Fazer backup de vez em quando e guarde o arquivo onde quiser. No celular novo, abra seu link e importe.',
+        q11: 'A Prancheta manda minhas aulas para uma IA?',
+        q11a: 'Não. Você copia o formato da aula para o seu próprio chat de IA e cola a resposta de volta. A Prancheta em si nunca envia as suas aulas para lugar nenhum.',
+        q7: 'Está na App Store?',
+        q7a: 'Ainda não. Ela instala direto pelo seu link, e é assim que continua custando US$10.',
+        q9: 'O app está em português?',
+        q9a: 'Sim. O app segue o idioma do seu celular, e você troca entre português e inglês quando quiser.',
+        q8: 'E se não for para mim?',
+        q8a: 'Mande um e-mail em até 30 dias e devolvemos o valor integral.',
+      };
+      const EN = { title: document.title };
+      document.querySelectorAll('[data-i18n]').forEach((el) => (EN[el.dataset.i18n] = el.innerHTML));
+      document.querySelectorAll('[data-i18n-alt]').forEach((el) => (EN[el.dataset.i18nAlt] = el.alt));
+      document.querySelectorAll('[data-i18n-content]').forEach((el) => (EN[el.dataset.i18nContent] = el.content));
+
+      function setLang(lang) {
+        const t = lang === 'pt' ? PT : EN;
+        document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+        document.title = t.title;
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          const v = t[el.dataset.i18n];
+          if (v !== undefined) el.innerHTML = v;
+        });
+        document.querySelectorAll('[data-i18n-alt]').forEach((el) => (el.alt = t[el.dataset.i18nAlt]));
+        document.querySelectorAll('[data-i18n-content]').forEach((el) => (el.content = t[el.dataset.i18nContent]));
+        document.querySelectorAll('img[data-src-pt]').forEach((el) => {
+          el.dataset.srcEn ??= el.getAttribute('src');
+          el.src = lang === 'pt' ? el.dataset.srcPt : el.dataset.srcEn;
+        });
+        document.querySelectorAll('[data-only]').forEach((el) => (el.hidden = el.dataset.only !== lang));
+        document.querySelectorAll('.lang button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+      }
+
+      function startLang() {
+        const asked = new URLSearchParams(location.search).get('lang');
+        if (asked === 'pt' || asked === 'en') return asked;
+        try {
+          const saved = localStorage.getItem('prancheta.lang');
+          if (saved === 'pt' || saved === 'en') return saved;
+        } catch {}
+        return (navigator.language || '').toLowerCase().startsWith('pt') ? 'pt' : 'en';
+      }
+
+      document.querySelectorAll('.lang button').forEach((b) =>
+        b.addEventListener('click', () => {
+          setLang(b.dataset.lang);
+          try { localStorage.setItem('prancheta.lang', b.dataset.lang); } catch {}
+        }),
+      );
+      const first = startLang();
+      if (first !== 'en') setLang(first);
+    </script>
+  </body>
+</html>

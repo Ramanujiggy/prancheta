@@ -1,0 +1,4 @@
+# Second Railway service for the sales page: Root Directory = site.
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/"

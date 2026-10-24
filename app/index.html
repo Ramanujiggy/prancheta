@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F8F9FB" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Prancheta</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon-rank.svg" />
+    <link rel="apple-touch-icon" href="/rank-touch-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Prancheta" />
+    <meta name="description" content="Plan your Jiu-Jitsu classes and teach them from your phone." />
+    <script>
+      // Paint in the coach's theme from the first frame. Same rules as
+      // resolveTheme in src/lib/theme.ts.
+      (function () {
+        var t, paper = { light: '#f8f9fb', navy: '#0f1a2b', slate: '#181b22', tan: '#1d1610', dark: '#161616' };
+        try { t = localStorage.getItem('prancheta.theme'); } catch (e) {}
+        if (!paper[t]) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'navy' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', paper[t]);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

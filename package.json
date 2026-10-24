@@ -1,0 +1,12 @@
+{
+  "name": "prancheta",
+  "private": true,
+  "description": "Deploy wrapper: the app lives in app/.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm --prefix app install --include=dev && npm --prefix app run build",
+    "start": "npm --prefix app run serve"
+  }
+}

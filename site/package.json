@@ -1,0 +1,14 @@
+{
+  "name": "prancheta-site",
+  "private": true,
+  "description": "The Prancheta sales page: one static page, served as-is.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "serve . -l tcp://0.0.0.0:${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.6"
+  }
+}

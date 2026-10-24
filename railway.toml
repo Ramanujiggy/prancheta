@@ -1,0 +1,7 @@
+# Deploys from the repo root; the app itself lives in app/.
+[build]
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/"

@@ -1,0 +1,5 @@
+# Netlify builds the app from the repo root, the same way Railway does.
+# The sales page is a second Netlify site with Base directory = site (see site/netlify.toml).
+[build]
+command = "npm run build"
+publish = "app/dist"
